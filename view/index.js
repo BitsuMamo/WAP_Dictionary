@@ -8,14 +8,21 @@ const baseURL = "http://localhost:8080";
 
 let count = 9;
 let offset = 0;
+let totalCount = 0;
 
 searchBtn.addEventListener("click", async (e) => {
     e.preventDefault();
 
     offset = 0;
     const term = termInput.value;
-    const URL = `${baseURL}/${term}?offset=${offset}&count=${count}`;
+    updateTotalCount();
 
+    if (term == "" || term == null) {
+        initializeScreen();
+        return;
+    }
+
+    const URL = `${baseURL}/getWords/${term}?offset=${offset}&count=${count}`;
     const data = await getWords(URL);
     refreshPage(data);
 });
@@ -27,10 +34,10 @@ nextBtn.addEventListener("click", async (e) => {
     offset += count;
 
     const term = termInput.value;
-    const URL = `${baseURL}/${term}?offset=${offset}&count=${count}`;
+    const URL = `${baseURL}/getWords/${term}?offset=${offset}&count=${count}`;
 
     const data = await getWords(
-        (termInput.value !== "" || termInput.value == null) ? `${baseURL}?offset=${offset}&count=${count}` : URL
+        (term == "" || term == null) ? `${baseURL}?offset=${offset}&count=${count}` : URL
     );
 
     refreshPage(data);
@@ -38,14 +45,14 @@ nextBtn.addEventListener("click", async (e) => {
 
 previousBtn.addEventListener("click", async (e) => {
     e.preventDefault();
-    if(offset > 0)
+    if (offset > 0)
         offset -= count;
 
     const term = termInput.value;
-    const URL = `${baseURL}/${term}?offset=${offset}&count=${count}`;
+    const URL = `${baseURL}/getWords/${term}?offset=${offset}&count=${count}`;
 
     const data = await getWords(
-        (termInput.value !== "" || termInput.value == null) ? `${baseURL}?offset=${offset}&count=${count}` : URL
+        (termInput.value == "" || termInput.value == null) ? `${baseURL}?offset=${offset}&count=${count}` : URL
     );
 
     refreshPage(data);
@@ -60,11 +67,30 @@ function refreshPage(data) {
         const card = createCard(element);
         output.appendChild(card);
     });
+
+    disableNexPrevBtn();
+
+}
+
+function disableNexPrevBtn() {
+    if (offset < count) {
+        previousBtn.disabled = true;
+    } else {
+        previousBtn.disabled = false;
+    }
+
+    console.log(`Offset: ${offset}\nCalc: ${totalCount - count}`);
+
+
+    if (offset >= totalCount - count) {
+        nextBtn.disabled = true;
+    } else {
+        nextBtn.disabled = false;
+    }
+
 }
 
 async function getWords(URL) {
-
-
     console.log(URL)
 
     const response = await fetch(URL);
@@ -106,20 +132,18 @@ function createCard(data) {
     return card;
 }
 
+async function updateTotalCount() {
+    const word = termInput.value;
+    console.log(word);
+    const totalCountResponse = await fetch(`${baseURL}/count?word=${word}`)
+    totalCount = await totalCountResponse.json();
+}
+
 async function initializeScreen() {
-    const response = await fetch(baseURL);
+    const data = await getWords(baseURL);
 
-    if (!response.ok) {
-        console.log("something");
-    }
-
-    const data = await response.json();
-    console.log(data)
-
-    data.forEach(element => {
-        const card = createCard(element);
-        output.appendChild(card);
-    });
+    updateTotalCount();
+    refreshPage(data);
 }
 
 initializeScreen();
