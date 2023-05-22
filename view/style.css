@@ -24,7 +24,6 @@ body {
     padding: 1rem;
     display: flex;
     flex-wrap: wrap;
-    flex: 4;
 }
 
 .card {
@@ -39,6 +38,19 @@ body {
     background-color: #F1F6F9;
     color: #212A3E;
 
+}
+
+@media (max-width: 650px) {
+    .card {
+        width: 100%;
+    }
+}
+
+/* Media query for window width > 650px and <= 1024px */
+@media (min-width: 651px) and (max-width: 1024px) {
+    .card {
+        width: 45%;
+    }
 }
 
 .card div {
@@ -58,7 +70,7 @@ body {
     font-style: italic;
 }
 
-.card-body{
+.card-body {
     font-size: 1.1rem;
     text-align: justify;
 }
@@ -137,16 +149,16 @@ button.primary:hover {
     transform: translateY(0);
 }
 
-.header{
+.header {
     justify-content: center;
 }
 
-.footer{
+.footer {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.footer button{
+.footer button {
     height: 3rem;
 }
