@@ -1,8 +1,3 @@
-const output = document.getElementById("output");
-const searchBtn = document.getElementById("search-btn");
-const termInput = document.getElementById("term-input");
-const nextBtn = document.getElementById("next-btn");
-const previousBtn = document.getElementById("previous-btn");
 
 const baseURL = "http://localhost:8080";
 
@@ -10,12 +5,12 @@ let count = 9;
 let offset = 0;
 let totalCount = 0;
 
-searchBtn.addEventListener("click", async (e) => {
+$("#search-btn").click(async (e) => {
     e.preventDefault();
 
     offset = 0;
-    const term = termInput.value;
-    updateTotalCount();
+    const term = $("#term-input").val();
+    await updateTotalCount();
 
     if (term == "" || term == null) {
         initializeScreen();
@@ -27,13 +22,11 @@ searchBtn.addEventListener("click", async (e) => {
     refreshPage(data);
 });
 
-
-
-nextBtn.addEventListener("click", async (e) => {
+$("#next-btn").click( async (e) => { 
     e.preventDefault();
     offset += count;
 
-    const term = termInput.value;
+    const term = $("#term-input").val()
     const URL = `${baseURL}/getWords/${term}?offset=${offset}&count=${count}`;
 
     const data = await getWords(
@@ -41,36 +34,47 @@ nextBtn.addEventListener("click", async (e) => {
     );
 
     refreshPage(data);
+    
 });
 
-previousBtn.addEventListener("click", async (e) => {
+$("#previous-btn").click(async (e) => { 
     e.preventDefault();
     if (offset > 0)
         offset -= count;
 
-    const term = termInput.value;
+    const term = $("#term-input").val()
     const URL = `${baseURL}/getWords/${term}?offset=${offset}&count=${count}`;
 
     const data = await getWords(
-        (termInput.value == "" || termInput.value == null) ? `${baseURL}?offset=${offset}&count=${count}` : URL
+        (term == "" || term == null) ? `${baseURL}?offset=${offset}&count=${count}` : URL
     );
 
     refreshPage(data);
-})
+    
+});
+
+$("#term-input").keydown(function (e) { 
+    if (e.key === "Enter") {
+        e.preventDefault();
+        $("#search-btn").click();
+    }
+});
+
 
 function refreshPage(data) {
-    while (output.firstChild) {
-        output.removeChild(output.firstChild);
-    }
 
-    data.forEach(element => {
-        const card = createCard(element);
-        output.appendChild(card);
+    $("#output").empty();
+
+    data.forEach(data => {
+        const card = createCard(data);
+        // output.appendChild(card);
+        $("#output").append(card)
     });
 
     disableNexPrevBtn();
 
 }
+
 
 function disableNexPrevBtn() {
     if (offset < count) {
@@ -79,7 +83,6 @@ function disableNexPrevBtn() {
         previousBtn.disabled = false;
     }
 
-    console.log(`Offset: ${offset}\nCalc: ${totalCount - count}`);
 
 
     if (offset >= totalCount - count) {
@@ -91,7 +94,6 @@ function disableNexPrevBtn() {
 }
 
 async function getWords(URL) {
-    console.log(URL)
 
     const response = await fetch(URL);
 
@@ -103,38 +105,30 @@ async function getWords(URL) {
     return data;
 }
 
-termInput.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        searchBtn.click();
-    }
-});
+
+
 
 function createCard(data) {
-    const card = document.createElement("div");
-    card.classList.add("card");
 
-    const word = document.createElement("div");
-    word.classList.add("card-title");
-    word.innerHTML = data.word;
+    const card = $(`
+        <div class="card">
+            <div class="card-title">
+                ${data.word}
+            </div>
+            <div class="card-sub-title">
+                ${data.wordtype}
+            </div>
+            <div class="card-body">
+                ${data.definition}
+            </div>
+        </div>
+    `)
 
-    const wordType = document.createElement("div");
-    wordType.classList.add("card-sub-title");
-    wordType.innerHTML = data.wordtype;
-
-    const definition = document.createElement("div");
-    definition.classList.add("card-body");
-    definition.innerHTML = data.definition;
-
-    card.appendChild(word);
-    card.appendChild(wordType);
-    card.appendChild(definition);
     return card;
 }
 
 async function updateTotalCount() {
-    const word = termInput.value;
-    console.log(word);
+    const word = $("#term-input").val();
     const totalCountResponse = await fetch(`${baseURL}/count?word=${word}`)
     totalCount = await totalCountResponse.json();
 }
@@ -142,7 +136,7 @@ async function updateTotalCount() {
 async function initializeScreen() {
     const data = await getWords(baseURL);
 
-    updateTotalCount();
+    await updateTotalCount();
     refreshPage(data);
 }
 
