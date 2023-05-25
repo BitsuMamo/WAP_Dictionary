@@ -12,5 +12,3 @@ app.use(wordsRouter);
 app.listen(port, async () => {
     console.log(`Server started on http://localhost:${port}`);
 })
-
-
