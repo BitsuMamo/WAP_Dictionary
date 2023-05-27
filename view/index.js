@@ -78,23 +78,24 @@ function refreshPage(data) {
 
 function disableNexPrevBtn() {
     if (offset < count) {
-        previousBtn.disabled = true;
+        $("#previous-btn").disabled = true;
     } else {
-        previousBtn.disabled = false;
+        $("#previous-btn").disabled = false;
     }
 
 
 
     if (offset >= totalCount - count) {
-        nextBtn.disabled = true;
+        $("#next-btn").disabled = true;
     } else {
-        nextBtn.disabled = false;
+        $("#next-btn").disabled = false;
     }
 
 }
 
 async function getWords(URL) {
 
+    displayLoading();
     const response = await fetch(URL);
 
     if (!response.ok) {
@@ -102,6 +103,7 @@ async function getWords(URL) {
     }
 
     const data = await response.json();
+    hideLoading();
     return data;
 }
 
@@ -129,8 +131,10 @@ function createCard(data) {
 
 async function updateTotalCount() {
     const word = $("#term-input").val();
+    displayLoading();
     const totalCountResponse = await fetch(`${baseURL}/count?word=${word}`)
     totalCount = await totalCountResponse.json();
+    hideLoading();
 }
 
 async function initializeScreen() {
@@ -139,6 +143,18 @@ async function initializeScreen() {
     await updateTotalCount();
     refreshPage(data);
 }
+
+function displayLoading(){
+    $("#loading").css("display", "block")
+}
+
+function hideLoading(){
+    $("#loading").css("display", "none")
+}
+
+
+
+
 
 initializeScreen();
 
